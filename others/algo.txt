@@ -1,0 +1,19 @@
+for (int l = 0; l < L; l++)
+	// check if the level is valid level.
+	
+	int newArray[row / roww][col / colw];
+
+	for (int i = 0; i < row; i += roww) 
+		for (int j = 0; j < cols; j += colw) 
+			idx = i * cols + j 
+			// median(we need to sort win) 	
+			// mean(we need even win and odd win). 
+			int temp[roww][colw];
+			for (int iw = 0; iw < roww; iw++) 
+				for (int jw = 0; jw < colsw; jw++)
+					int curr_idx = idx + iw * cols + jw
+			// ..
+	row = row / roww
+	col = col / colw
+
+	print new level.

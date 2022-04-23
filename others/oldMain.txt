@@ -1,0 +1,85 @@
+.data
+	.globl newLine
+	.globl line
+	.globl space
+	
+	# for displaying.
+	msg_rows: .asciiz "\n Please enter the number of rows: \n"
+	msg_cols: .asciiz "\n Please enter the number of cols: \n"
+	msg_arr: .asciiz "\n Please enter the values of 2D-array: \n"
+	
+	msg3: .asciiz "\n The array before sorting: \n"	
+	msg4: .asciiz "\n The array after sorting: \n"
+	
+	newLine: .asciiz "\n "
+	line: .asciiz "==================================\n"
+	space: .asciiz " "
+	
+
+	# vars in memory.
+	rows: .word 0
+	cols: .word 0
+	size: .word 0
+	sizeInByte: .word 0
+	arr: .word 0
+	
+.text
+	.globl main
+	main:
+		# print msg & read rows.
+		la 		$a0, msg_rows
+		jal 		PRINT_STR
+		jal 		READ_INT
+		sw 		$v0, rows
+
+		# print msg & read cols.
+		la 		$a0, msg_cols
+		jal 		PRINT_STR				
+		jal 		READ_INT
+		sw 		$v0, cols
+		
+		# set size=rows*cols and print it.
+		lw 		$t0, rows
+		lw 		$t1, cols
+		mul 		$a0, $t0, $t1
+		sw 		$a0, size
+		
+		# create dynamic array[size].
+		li 		$t0, 4
+		lw 		$a0, size
+		mul 		$a0, $a0, $t0
+		sw 		$a0, sizeInByte	
+		li 		$v0, 9		
+		syscall	
+		sw 		$v0, arr	# arr = address of 2D array.		
+		
+		# read array.
+		lw 		$a0, arr
+		lw 		$a1, size 
+		jal 		READ_ARRAY
+
+		# print array.
+		lw 		$a0, arr
+		lw 		$a1, size 
+		lw		$a2, cols
+		jal 		PRINT_2D_ARRAY
+							
+		# sort array.
+		lw 		$a0, arr
+		lw 		$a1, size 
+		jal 		SORT_ARRAY
+		
+		# print line of '='
+		la 		$a0, line
+		jal 		PRINT_STR
+		
+		# print array.
+		lw 		$a0, arr
+		lw 		$a1, size 
+		lw		$a2, cols
+		jal 		PRINT_2D_ARRAY
+								
+###################### METHODS ########################
+	END_PROGRAM:	# terminate program.
+		li 		$v0, 10
+		syscall
