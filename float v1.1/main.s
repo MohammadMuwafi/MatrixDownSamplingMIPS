@@ -8,7 +8,14 @@
 	.globl	answerOfMedianOrMean
 	.globl	forEvenLvl
 	.globl	choice
-	.globl 	sizeOfOddWin
+	.globl 	rows
+	.globl 	cols
+	.globl 	file
+	.globl 	buffer
+	.globl 	bufferSize
+	.globl 	arr
+	.globl 	size
+	.globl 	sizeInByte
 	
 	
 	####################### for displaying. ########################
@@ -26,14 +33,24 @@
 	space: 		.asciiz " "
 	################################################################
 	
+	# file name	
+	file: 		.asciiz "input3.txt"
+	buffer: 		.space 131072
+	bufferSize: 	.word 131072
+		
+	
+	# bytes for string version of the number
+	str:   .space 128         
+
+	
 	# mean or median
 	choice: 		.word 1
 			
 	# properties of input matrix.
-	rows: 		.word 8
-	cols: 		.word 8
-	size: 		.word 64
-	sizeInByte: 	.word 256
+	rows: 		.word 32
+	cols: 		.word 32
+	size: 		.word 1024
+	sizeInByte: 	.word 4096
 	
 			
 	# properties of window matrix.
@@ -49,19 +66,43 @@
 	meanOrMedian:	.word 0
 
 	# arr is the address of input matrix in memory. 
-	arr: 		.float 1.1,  2.1,  3.1,  4.1,  5.1,  6.1,  7.1,  8.1
-				.float 9.1,  10.1, 11.1, 12.1, 13.1, 14.1, 15.1, 16.1
-				.float 17.1, 18.1, 19.1, 20.1, 21.1, 22.1, 23.1, 24.1
-				.float 25.1, 26.1, 27.1, 28.1, 29.1, 30.1, 31.1, 32.1
-				.float 33.1, 34.1, 35.1, 36.1, 37.1, 38.1, 39.1, 40.1
-				.float 41.1, 42.1, 43.1, 44.1, 45.1, 46.1, 47.1, 48.1
-				.float 49.1, 50.1, 51.1, 52.1, 53.1, 54.1, 55.1, 56.1
-				.float 57.1, 58.1, 59.1, 60.1, 61.1, 62.1, 63.1, 64.1
-					
+	try: .float 6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1
+		.float 7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1
+		.float 2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1
+		.float 1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5
+		.float 1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
+		.float 2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5
+		.float 1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0
+		.float 1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1
+		.float 6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5
+		.float 7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0
+		.float 2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
+		.float 1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5
+		.float 1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,5.6,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
+		.float 2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6
+		.float 1.9,2.6,1.5,4.8,9.4,7.2,5.2,5.6,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.5,2.6,1.5,4.8,9.4,7.2,5.7,5.6
+		.float 1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,5.6
+		.float 6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6
+		.float 7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
+		.float 2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6
+		.float 1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1
+		.float 1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4
+		.float 2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0
+		.float 1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6
+		.float 1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
+		.float 6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1
+		.float 7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4
+		.float 2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4
+		.float 1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1
+		.float 1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0
+		.float 2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4
+		.float 1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
+		.float 1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
+			
 	
 	# tempArray that will contain the elements of current window matrix.
-	tempArray: 	.float 1.1, 2.1
-			 	.float 9.1, 10.1
+	tempArray: 	.float 0.0, 0.0
+			 	.float 0.0, 0.0
 	
 	sizeOfOddWin:	.float 4.0	 	
 			 	
@@ -87,10 +128,21 @@
 	# var for calculating avg in even len. of array case.
 	forEvenLvl:	.float 2.0
 	
+	arr: 	.float 0
 .text
 	.globl main
 	
 	main:
+		jal		READ_FLOAT_FROM_FILE	
+		#jal		END_PROGRAM
+		
+		#li   	$a0, -1102           # $a0 = int to convert
+		#la   	$a1, str             # $a1 = address of string where converted number will be kept
+		#jal  	INT_TO_STR              # call int2str
+		#la   	$a0, str             # once returned, str has the string version. Print it.
+		#li   	$v0, 4               # $v0 = 4 for printing string pointed to by $a0
+		#syscall                   # after this, the console has '-1102'		
+		#jal 		END_PROGRAM
 		
 		# print msg & read levels.
 		la 		$a0, msg_lvl1
@@ -310,13 +362,12 @@
 						WORK_WITH_MEDIAN_SKIP:
 						
 						# print median.
-						lwc1 	$f12, answerOfMedianOrMean
-						li		$v0, 2
-						syscall
-						
-						la 		$a0, newLine
-						li 		$v0, 4
-						syscall	
+						#lwc1 	$f12, answerOfMedianOrMean
+						#li		$v0, 2
+						#syscall
+						#la 		$a0, newLine
+						#li 		$v0, 4
+						#syscall	
 
 						#sw		$v0, median
 						#lw		$a0, median
@@ -353,10 +404,14 @@
 						add 		$sp, $sp, 12
 						
 						# printing.
-						la 		$a0, tempArray
-						lw 		$a1, windowSize 
-						lw		$a2, colsWindow
-						jal 		PRINT_2D_ARRAY
+						#la 		$a0, tempArray
+						#lw 		$a1, windowSize 
+						#lw		$a2, colsWindow
+						#jal 		PRINT_2D_ARRAY
+						
+						sub.s	$f6, $f6, $f6
+						swc1 	$f6, answerOfMedianOrMean
+						
 							
 					################################################################
 						lw 		$s0, colsWindow
@@ -581,6 +636,8 @@
 		li 		$t1, 4
 		li		$t2, 0
 		li		$t3, 0
+		sub.s 	$f6, $f6, $f6
+		sub.s 	$f4, $f4, $f4
 		
 		MEAN_ALGORITHM_LOOP1:
 				beq 		$t1, $zero, MEAN_ALGORITHM_LOOP1_OUT1
@@ -705,3 +762,174 @@
 					lw 		$t7, 28($sp) 
 					add 		$sp, $sp, 32
 					jr 		$ra
+
+#######################################################
+
+	INT_TO_STR:
+		# inputs : $a0 -> integer to convert
+		#          $a1 -> address of string where converted number will be kept
+		# outputs: none
+
+		addi 	$sp, $sp, -4         	# to avoid headaches save $t- registers used in this procedure on stack
+		sw   	$t0, ($sp)           	# so the values don't change in the caller. We used only $t0 here, so save that.
+		bltz 	$a0, neg_num         	# is num < 0 ?
+		j    	next0                	# else, goto 'next0'
+
+		neg_num:                 		 # body of "if num < 0:"
+			li   	$t0, '-'
+			sb   	$t0, ($a1)           # *str = ASCII of '-' 
+			addi 	$a1, $a1, 1          # str++
+			li   	$t0, -1
+			mul  	$a0, $a0, $t0        # num *= -1
+
+		next0:
+			li   	$t0, -1
+			addi 	$sp, $sp, -4         # make space on stack
+			sw   	$t0, ($sp)           # and save -1 (end of stack marker) on MIPS stack
+
+		push_digits:
+			blez 	$a0, next1           # num < 0? If yes, end loop (goto 'next1')
+			li   	$t0, 10              # else, body of while loop here
+			div  	$a0, $t0             # do num / 10. LO = Quotient, HI = remainder
+			mfhi 	$t0                  # $t0 = num % 10
+			mflo 	$a0                  # num = num // 10  
+			addi 	$sp, $sp, -4         # make space on stack
+			sw   	$t0, ($sp)           # store num % 10 calculated above on it
+			j    	push_digits          # and loop
+
+			next1:
+			lw   	$t0, ($sp)           # $t0 = pop off "digit" from MIPS stack
+			addi 	$sp, $sp, 4          # and 'restore' stack
+			
+			bltz 	$t0, neg_digit       # if digit <= 0, goto neg_digit (i.e, num = 0)
+			j    	pop_digits           # else goto popping in a loop
+
+			neg_digit:
+				li   $t0, '0'
+				sb   $t0, ($a1)           # *str = ASCII of '0'
+				addi $a1, $a1, 1          # str++
+				j    next2                # jump to next2
+
+			pop_digits:
+				bltz $t0, next2           # if digit <= 0 goto next2 (end of loop)
+				addi $t0, $t0, '0'        # else, $t0 = ASCII of digit
+				sb   $t0, ($a1)           # *str = ASCII of digit
+				addi $a1, $a1, 1          # str++
+				lw   $t0, ($sp)           # digit = pop off from MIPS stack 
+				addi $sp, $sp, 4          # restore stack
+				j    pop_digits           # and loop
+
+			next2:
+				sb  $zero, ($a1)          # *str = 0 (end of string marker)
+
+				lw   $t0, ($sp)           # restore $t0 value before function was called
+				addi $sp, $sp, 4          # restore stack
+				jr  $ra                   # jump to caller
+
+#######################################################
+
+	READ_FLOAT_FROM_FILE:
+		#open file
+		li 	$v0, 13		# system call to open file
+		la 	$a0, file	# input file name
+		li 	$a1, 0		# flags
+		syscall
+		move 	$t0, $v0	# save file descritor in $t0
+		
+		# Read to file just opened  
+		li 	$v0, 14       	# system call to read from file
+		la 	$a1, buffer   	# address of buffer 
+		lw	$a2, bufferSize # hardcoded buffer length
+		move 	$a0, $t0    	# put the file descriptor in $a0		
+		syscall          	# write to file
+
+		# Print input
+		la 	$a0, buffer 	# load the address into $a0
+		li 	$v0, 4		# print the string out
+		syscall 
+		
+		
+		# close file
+		li 	$v0, 16		# system call to close file
+		move 	$a0, $t0	# restore fd	
+		syscall			# close file
+		
+		
+		
+		#### convert string to arr
+		addiu 	$t0, $zero, 0 	# column size
+		addiu 	$t1, $zero, 0	# row size
+		addiu 	$t5, $zero, 0	# processing register
+		addi 	$t6, $zero, -1 	# counter
+		sub.s 	$f4, $f4, $f4	# final floating point number
+		
+		addiu	$t2, $zero, 10	# move 10 to $f6
+		mtc1 	$t2, $f6
+		cvt.s.w $f6, $f6
+		
+		la 	$t2, buffer	# address of string
+		lb 	$t3, ($t2)	# $t3 = byte in string
+		
+		la 	$t4, arr	# address of arr
+		
+		NEXT_BYTE_LOOP1:
+			beq 	$t3, '.', INCREMENT_COUNTER	# starts counter for number of digits after decimal point
+			beq 	$t3, ',', SAVE_ELEMENT		# save element if ',' is the character
+			beq 	$t3, '\n', INCREMENT_ROWSIZE	# save element and increment row counter if newline
+			beq 	$t3, 13, NEXT_CHR		# skip element if feed return
+			blt 	$t3, '0', NEXT_BYTE_LOOP1_EXIT		# not expected character --> exit
+			bgt 	$t3, '9', NEXT_BYTE_LOOP1_EXIT		# not expected character --> exit
+			
+			mul 	$t5, $t5, 10			# process the element
+			subi	$t3, $t3, 48
+			add 	$t5, $t5, $t3
+			
+			bge 	$t6, 0, INCREMENT_COUNTER
+			
+			j 	NEXT_CHR
+			
+			INCREMENT_ROWSIZE:
+				add 	$t1, $t1, 1 		# increment row size
+				
+			SAVE_ELEMENT:
+				mtc1 	$t5, $f4
+				cvt.s.w $f4, $f4	
+				
+				DIVIDE:		
+					div.s 	$f4, $f4, $f6
+					subi	$t6, $t6, 1
+					bgt	$t6, 0, DIVIDE
+				
+				swc1 	$f4, ($t4)		# store floating point in arr
+				
+				subi	$t6, $t6, 1		# stop counter
+				addi 	$t4, $t4, 4		# increment arr
+				addiu 	$t5, $zero, 0		# clear processing register
+				j 	NEXT_CHR
+			
+			INCREMENT_COUNTER:
+				addi 	$t6, $t6, 1		# increment after decimal point counter
+				
+			NEXT_CHR:	
+				addi 	$t2, $t2, 1		# increment character counter
+				lb 	$t3, ($t2)		# get next charcater in string array
+				j 	NEXT_BYTE_LOOP1
+		
+		NEXT_BYTE_LOOP1_EXIT:
+			la 		$t0, arr	# get column size
+			sub		$t0,$t4,$t0
+			sw		$t1, rows
+			div 		$t0,$t0,4	
+			div 		$t0,$t0,$t1	
+			sw		$t0, cols
+			
+			lw		$t1, rows
+			lw		$t0, cols
+			
+			mul		$t1, $t1, $t0
+			sw		$t1, size
+			mul		$t1, $t1, 4
+			sw		$t1, sizeInByte
+					
+					
+		jr 		$ra

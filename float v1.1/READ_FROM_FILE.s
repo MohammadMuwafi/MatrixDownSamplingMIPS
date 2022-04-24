@@ -5,6 +5,7 @@
 	
 	matrix: 	.word '\0'
 .text
+	main:
 	#open file
 	li 	$v0, 13		# system call to open file
 	la 	$a0, file	# input file name
@@ -33,8 +34,8 @@
 	
 	
 	#### convert string to matrix
-	addiu 	$t0, $zero, 0 	# column size
-	addiu 	$t1, $zero, 0	# row size
+	addiu 	$t0, $zero, 8 	# column size
+	addiu 	$t1, $zero, 8	# row size
 	addiu 	$t5, $zero, 0	# processing register
 	
 	la 	$t2, buffer	# address of string
