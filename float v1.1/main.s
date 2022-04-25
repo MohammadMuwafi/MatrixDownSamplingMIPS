@@ -33,10 +33,13 @@
 	space: 		.asciiz " "
 	################################################################
 	
-	# file name	
-	file: 		.asciiz "input3.txt"
+	# file name
+	file: 		.asciiz "input.txt"
 	buffer: 		.space 131072
 	bufferSize: 	.word 131072
+	output_file: 	.asciiz "outputx.txt"
+	million: 	.float 1000000.0	# used for getting all digits
+	string: 	.space 131072		# maximum space of string = 2096 bytes
 		
 	
 	# bytes for string version of the number
@@ -47,10 +50,10 @@
 	choice: 		.word 1
 			
 	# properties of input matrix.
-	rows: 		.word 32
-	cols: 		.word 32
-	size: 		.word 1024
-	sizeInByte: 	.word 4096
+	rows: 		.word 0
+	cols: 		.word 0
+	size: 		.word 0
+	sizeInByte: 	.word 0
 	
 			
 	# properties of window matrix.
@@ -63,42 +66,6 @@
 	
 	# the median value for the elements in the specific window.
 	answerOfMedianOrMean: 		.float 0.0
-	meanOrMedian:	.word 0
-
-	# arr is the address of input matrix in memory. 
-	try: .float 6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1
-		.float 7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1
-		.float 2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1
-		.float 1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5
-		.float 1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
-		.float 2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5
-		.float 1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0
-		.float 1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1
-		.float 6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5
-		.float 7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0
-		.float 2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
-		.float 1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5
-		.float 1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,5.6,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
-		.float 2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6
-		.float 1.9,2.6,1.5,4.8,9.4,7.2,5.2,5.6,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.5,2.6,1.5,4.8,9.4,7.2,5.7,5.6
-		.float 1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,5.6
-		.float 6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6
-		.float 7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
-		.float 2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6
-		.float 1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1
-		.float 1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4
-		.float 2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0
-		.float 1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6
-		.float 1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
-		.float 6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1
-		.float 7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4
-		.float 2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4
-		.float 1.5,2.6,1.5,4.8,9.4,7.2,5.7,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1
-		.float 1.1,5.2,5.6,2.5,5.6,8.2,3.5,4.6,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0
-		.float 2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4
-		.float 1.9,2.6,1.5,4.8,9.4,7.2,5.2,9.1,2.8,2.7,2.6,9.2,1.2,2.9,8.0,6.4,7.1,5.8,2.6,8.2,2.0,5.3,2.6,2.5,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
-		.float 1.1,4.2,5.6,2.5,8.6,8.2,3.5,4.0,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5,2.6,2.5,2.6,9.2,1.2,2.5,8.0,6.4,6.5,2.3,2.4,1.0,2.5,8.9,1.0,5.5
-			
 	
 	# tempArray that will contain the elements of current window matrix.
 	tempArray: 	.float 0.0, 0.0
@@ -120,6 +87,7 @@
 				.float 1.5, 0.5
 	# level of reduction, input user.			
 	levels: 		.word 0
+	lvls:		.byte 0
 	
 	# indices for the specific cell in the array of the current level. 
 	tempI: 		.word 0
@@ -127,6 +95,8 @@
 	
 	# var for calculating avg in even len. of array case.
 	forEvenLvl:	.float 2.0
+	
+	tempAddOfNewArr: .word	0
 	
 	arr: 	.float 0
 .text
@@ -449,6 +419,50 @@
 				la 		$a0, newLine
 				jal 		PRINT_STR
 				
+				sw		$s4, tempAddOfNewArr
+				
+				addi 	$sp, $sp, -72
+				sw 		$t0, 0($sp) 
+				sw 		$t1, 4($sp) 
+				sw 		$t2, 8($sp) 					
+				sw 		$t3, 12($sp) 
+				sw 		$t4, 16($sp) 
+				sw 		$t5, 20($sp) 
+				sw 		$t6, 24($sp) 
+				sw 		$t7, 28($sp) 					
+				sw 		$t8, 32($sp) 
+				sw 		$t9, 36($sp) 
+				sw 		$s0, 40($sp) 
+				sw 		$s1, 44($sp) 
+				sw 		$s2, 48($sp) 					
+				sw 		$s3, 52($sp) 
+				sw 		$s4, 56($sp) 
+				sw 		$s5, 60($sp) 							
+				sw 		$s6, 64($sp) 							
+				sw 		$s7, 68($sp) 
+		
+				jal		WRTITE_TO_FILE
+				
+				lw 		$t0, 0($sp) 
+				lw 		$t1, 4($sp) 
+				lw 		$t2, 8($sp) 					
+				lw 		$t3, 12($sp) 
+				lw 		$t4, 16($sp) 
+				lw 		$t5, 20($sp) 
+				lw 		$t6, 24($sp) 
+				lw 		$t7, 28($sp) 					
+				lw 		$t8, 32($sp) 
+				lw 		$t9, 36($sp) 
+				lw 		$s0, 40($sp) 
+				lw 		$s1, 44($sp) 
+				lw 		$s2, 48($sp) 					
+				lw 		$s3, 52($sp) 
+				lw 		$s4, 56($sp) 
+				lw 		$s5, 60($sp) 							
+				lw 		$s6, 64($sp) 							
+				lw 		$s7, 68($sp) 
+				add 		$sp, $sp, 72
+		
 				# update rows and cols. 
 				lw		$a0, tempRows
 				sw		$a0, rows
@@ -459,11 +473,19 @@
 				mul		$s0, $s0, 4
 				sw		$s0, sizeInByte
 				
+				
+				lb		$s0, lvls
+				addi		$s0, $s0, 1
+				sb		$s0, lvls
+				
 				j 		LOOP_LEVELS
 		LOOP_LEVELS_ERROR:
 			la		$a0, invalid_lvl
 			jal 		PRINT_STR	
 		LOOP_LEVELS_EXIT:
+				# close output file
+		li 		$v0, 16		# system call to close file	
+		syscall	
 			jal END_PROGRAM
 				
 ###################### METHODS ########################
@@ -765,69 +787,6 @@
 
 #######################################################
 
-	INT_TO_STR:
-		# inputs : $a0 -> integer to convert
-		#          $a1 -> address of string where converted number will be kept
-		# outputs: none
-
-		addi 	$sp, $sp, -4         	# to avoid headaches save $t- registers used in this procedure on stack
-		sw   	$t0, ($sp)           	# so the values don't change in the caller. We used only $t0 here, so save that.
-		bltz 	$a0, neg_num         	# is num < 0 ?
-		j    	next0                	# else, goto 'next0'
-
-		neg_num:                 		 # body of "if num < 0:"
-			li   	$t0, '-'
-			sb   	$t0, ($a1)           # *str = ASCII of '-' 
-			addi 	$a1, $a1, 1          # str++
-			li   	$t0, -1
-			mul  	$a0, $a0, $t0        # num *= -1
-
-		next0:
-			li   	$t0, -1
-			addi 	$sp, $sp, -4         # make space on stack
-			sw   	$t0, ($sp)           # and save -1 (end of stack marker) on MIPS stack
-
-		push_digits:
-			blez 	$a0, next1           # num < 0? If yes, end loop (goto 'next1')
-			li   	$t0, 10              # else, body of while loop here
-			div  	$a0, $t0             # do num / 10. LO = Quotient, HI = remainder
-			mfhi 	$t0                  # $t0 = num % 10
-			mflo 	$a0                  # num = num // 10  
-			addi 	$sp, $sp, -4         # make space on stack
-			sw   	$t0, ($sp)           # store num % 10 calculated above on it
-			j    	push_digits          # and loop
-
-			next1:
-			lw   	$t0, ($sp)           # $t0 = pop off "digit" from MIPS stack
-			addi 	$sp, $sp, 4          # and 'restore' stack
-			
-			bltz 	$t0, neg_digit       # if digit <= 0, goto neg_digit (i.e, num = 0)
-			j    	pop_digits           # else goto popping in a loop
-
-			neg_digit:
-				li   $t0, '0'
-				sb   $t0, ($a1)           # *str = ASCII of '0'
-				addi $a1, $a1, 1          # str++
-				j    next2                # jump to next2
-
-			pop_digits:
-				bltz $t0, next2           # if digit <= 0 goto next2 (end of loop)
-				addi $t0, $t0, '0'        # else, $t0 = ASCII of digit
-				sb   $t0, ($a1)           # *str = ASCII of digit
-				addi $a1, $a1, 1          # str++
-				lw   $t0, ($sp)           # digit = pop off from MIPS stack 
-				addi $sp, $sp, 4          # restore stack
-				j    pop_digits           # and loop
-
-			next2:
-				sb  $zero, ($a1)          # *str = 0 (end of string marker)
-
-				lw   $t0, ($sp)           # restore $t0 value before function was called
-				addi $sp, $sp, 4          # restore stack
-				jr  $ra                   # jump to caller
-
-#######################################################
-
 	READ_FLOAT_FROM_FILE:
 		#open file
 		li 	$v0, 13		# system call to open file
@@ -933,3 +892,116 @@
 					
 					
 		jr 		$ra
+
+############################################################
+
+	WRTITE_TO_FILE:
+		sw		$s4, tempAddOfNewArr
+		
+		lb 		$t9, lvls
+		addi		$t9, $t9, 49
+		la		$s7, output_file
+		addi		$s7, $s7, 6
+		sb		$t9, ($s7)
+		
+		# initialization
+		lw		$t0, tempRows				# get row size
+		lw		$t1, tempCols				# get column size
+		lw		$s3, tempAddOfNewArr
+
+		addi		$s0, $zero, 0				# row counter
+		addi		$s1, $zero, 0				# column counter
+
+		lwc1		$f4, million				# set to million
+		cvt.d.s 	$f4, $f4
+		addi 	$t6, $zero, '.'			# set $t6 to '.'
+		addi		$t7, $zero, ','			# set $t7 to ','
+		addi		$t8, $zero, '\n' 			# set $t8 to '\n'
+		la		$t5, string				# load address of string
+
+		### loop through elements in matrix
+		
+		WRTITE_TO_FILE_LOOP_ROWS:
+			beq		$s0, $t0, WRTITE_TO_FILE_LOOP_ROWS_EXIT	# exit rows loop
+			
+			
+			WRTITE_TO_FILE_LOOP_COLS:
+				beq 		$s1, $t1, WRTITE_TO_FILE_LOOP_COLS_EXIT	# exit columns loop
+				
+				
+				########## CONVERTING FLOATING POINT TO STRING ########## 
+				lwc1 	$f6, ($s3)	# get number
+				cvt.d.s 	$f6, $f6	# convert to double precision floating point
+		
+				mul.d 	$f6, $f6, $f4	# get all digits in front of decimal point
+		
+				cvt.w.d 	$f6, $f6	# convert to word
+				mfc1.d	$t2, $f6	# move floating point to register $t2
+		
+				# store digits in ascii format in stack
+				addi 	$t4, $zero, 0	# digit counter
+				WRTITE_TO_FILE_CVT_DIGITS:
+					div 		$t2, $t2, 10	# hi = less significant digit 
+					mfhi 	$t3		# get remainder
+					addi 	$t3, $t3, 48 	# convert to ascii
+					sub 		$sp, $sp, 1	
+					sb		$t3, ($sp)	# store digit in stack
+					addi 	$t4, $t4, 1	# increment digit counter
+					beq		$t4, 6, WRTITE_TO_FILE_ADD_DOT	# add dot to stack
+					bne 		$t2, $zero, WRTITE_TO_FILE_CVT_DIGITS	# loop digits
+					j		WRTITE_TO_FILE_SAVE_DIGITS	# converting is done, save digits in string
+		
+					WRTITE_TO_FILE_ADD_DOT:
+						sub 		$sp, $sp, 1	# decrement stack pointer
+						sb		$t6, ($sp)	# push dot in stack
+						add		$t4, $t4, 1	# increment digit counter
+						j		WRTITE_TO_FILE_CVT_DIGITS
+		
+				# save digits in string
+				WRTITE_TO_FILE_SAVE_DIGITS:
+					lb		$t3, ($sp)	# get most significant digit
+					add 		$sp, $sp, 1	# delete stack space
+					sub 		$t4, $t4, 1	# decrement digit counter
+					sb		$t3, ($t5)	# store digit in string
+					add 		$t5, $t5, 1	# increment string address
+					bne 		$t4, $zero, WRTITE_TO_FILE_SAVE_DIGITS		# loop digits in ascii format
+				########## CONVERTING FLOATING POINT TO STRING ##########
+				
+				addi		$s1, $s1, 1	# increment column counter
+				addi 	$s3, $s3, 4	# increment matrix address		
+				beq		$s1, $t1, WRTITE_TO_FILE_LOOP_COLS_EXIT	# exit column loop		
+				
+				# add coma
+				sb		$t7, ($t5)	# store coma
+				addi		$t5, $t5, 1	# increment string address
+
+				j 		WRTITE_TO_FILE_LOOP_COLS	# loop column elements
+			WRTITE_TO_FILE_LOOP_COLS_EXIT:
+			
+			sb 		$t8, ($t5)	# store new line
+			addi 	$t5, $t5, 1	# increment string address
+			
+			addi 	$s1, $zero, 0	# reset column counter
+			addi 	$s0, $s0, 1	# increment row counter
+			j		WRTITE_TO_FILE_LOOP_ROWS	# loop rows
+		WRTITE_TO_FILE_LOOP_ROWS_EXIT:
+
+		# get string size
+		la		$t1, string	# address of string
+		sub		$t1, $t5, $t1	# get size of string
+		
+		# open output file
+		li 		$v0, 13		# system call to open file
+		la 		$a0, output_file	# output file name
+		li 		$a1, 1		# flags
+		li		$a2, 0
+		syscall			# file descriptor in $v0
+
+		# write on output file
+		move 	$a0, $v0	# move file descriptor to $a0
+		li 		$v0, 15      	# system call to write to file
+		la 		$a1, string  	# address of string 
+		move		$a2, $t1	# string length		
+		syscall
+			
+		jr	$ra
