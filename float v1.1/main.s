@@ -19,15 +19,12 @@
 	
 	
 	####################### for displaying. ########################
-	msg_rows: 	.asciiz "\n Please enter the number of rows: \n"
-	msg_cols: 	.asciiz "\n Please enter the number of cols: \n"
-	msg_arr: 		.asciiz "\n Please enter the values of 2D-array: \n"
 	msg_lvl1: 	.asciiz "\n Please enter the values of levels: \n"
 	msg_lvl2: 	.asciiz "\n Level number: "
+	msg_lvl3: 	.asciiz "\n Please enter 0 for median or 1 for mean: \n"	
+
 	invalid_lvl: 	.asciiz "\n Sorry, invalid level!\n"
 	
-	msg3: 		.asciiz "\n The array before sorting: \n"	
-	msg4: 		.asciiz "\n The array after sorting: \n"
 	newLine: 		.asciiz "\n "
 	line: 		.asciiz "==================================\n"
 	space: 		.asciiz " "
@@ -35,19 +32,14 @@
 	
 	# file name
 	file: 		.asciiz "input.txt"
-	buffer: 		.space 131072
-	bufferSize: 	.word 131072
+	buffer: 		.space 16384
+	bufferSize: 	.word 16384
 	output_file: 	.asciiz "outputx.txt"
 	million: 	.float 1000000.0	# used for getting all digits
-	string: 	.space 131072		# maximum space of string = 2096 bytes
-		
-	
-	# bytes for string version of the number
-	str:   .space 128         
-
+	string: 	.space 16384		# maximum space of string = 2096 bytes
 	
 	# mean or median
-	choice: 		.word 1
+	choice: 		.word 0
 			
 	# properties of input matrix.
 	rows: 		.word 0
@@ -104,21 +96,20 @@
 	
 	main:
 		jal		READ_FLOAT_FROM_FILE	
-		#jal		END_PROGRAM
-		
-		#li   	$a0, -1102           # $a0 = int to convert
-		#la   	$a1, str             # $a1 = address of string where converted number will be kept
-		#jal  	INT_TO_STR              # call int2str
-		#la   	$a0, str             # once returned, str has the string version. Print it.
-		#li   	$v0, 4               # $v0 = 4 for printing string pointed to by $a0
-		#syscall                   # after this, the console has '-1102'		
-		#jal 		END_PROGRAM
-		
+
 		# print msg & read levels.
 		la 		$a0, msg_lvl1
 		jal 		PRINT_STR			
 		jal 		READ_INT
-		sw 		$v0, levels
+		move		$a0, $v0
+		addi		$a0, $a0, -2
+		sw 		$a0, levels
+
+		# print msg & read choice.
+		la 		$a0, msg_lvl3
+		jal 		PRINT_STR			
+		jal 		READ_INT
+		sw		$v0, choice
 		
 		move 	$s7, $zero
 		LOOP_LEVELS:
@@ -129,7 +120,7 @@
 			li 		$v0, 4
 			syscall
 			move 	$a0, $s7
-			addi		$a0, $a0, 1			
+			addi		$a0, $a0, 2			
 			li 		$v0, 1
 			syscall	
 			la		$a0, newLine
@@ -143,7 +134,7 @@
 			sw 		$s0, 0($sp) 
 			sw 		$s1, 4($sp) 
 			sw 		$s2, 8($sp) 					
-			sw 		$s3, 8($sp) 
+			sw 		$s3, 12($sp) 
 			
 			# tempRows = rows/rowsWindow
 			lw	 	$s0, rows
@@ -310,16 +301,16 @@
 						
 						li		$s5, 2
 						move		$s6, $s7
-						add		$s6,	$s6, 1
+						add		$s6,	$s6, 2
 						div		$s6, $s5
-						mfhi 	$s6
-						beq		$s6,	$zero, SET_EVEN_LEVEL 
-						li		$a1, 1
-						j		SET_EVEN_LEVEL_SKIP
+						mfhi 	$a1
+						#beq		$s6,	$zero, SET_EVEN_LEVEL 
+						#li		$a1, 1
+						#j		SET_EVEN_LEVEL_SKIP
 						
-						SET_EVEN_LEVEL:
-							li		$a1, 0
-						SET_EVEN_LEVEL_SKIP:
+						#SET_EVEN_LEVEL:
+						#	li		$a1, 0
+						#SET_EVEN_LEVEL_SKIP:
 							
 						jal		MEAN_ALGORITHM
 						j		WORK_WITH_MEDIAN_SKIP
@@ -480,12 +471,37 @@
 				
 				j 		LOOP_LEVELS
 		LOOP_LEVELS_ERROR:
+
 			la		$a0, invalid_lvl
 			jal 		PRINT_STR	
+			
+			lb 		$t9, lvls
+			addi		$t9, $t9, 49
+			la		$s7, output_file
+			addi		$s7, $s7, 6
+			sb		$t9, ($s7)
+						
+			# open output file
+			li 		$v0, 13			# system call to open file
+			la 		$a0, output_file	# output file name
+			li 		$a1, 1			# flags
+			li		$a2, 0
+			syscall					# file descriptor in $v0
+
+			# write on output file
+			move 	$a0, $v0			# move file descriptor to $a0
+			li 		$v0, 15      		# system call to write to file
+			la 		$a1, invalid_lvl  	# address of string 
+			li		$a2, 25			# string length		
+			syscall
+
+			
+			# close output file
+			li 		$v0, 16		# system call to close file	
+			syscall	
+										
 		LOOP_LEVELS_EXIT:
-				# close output file
-		li 		$v0, 16		# system call to close file	
-		syscall	
+
 			jal END_PROGRAM
 				
 ###################### METHODS ########################
@@ -647,6 +663,7 @@
 						
 #######################################################
 	
+	
 	MEAN_ALGORITHM:	
 		# $a0: address of array.
 		# $a1: (current level) % 2.				
@@ -661,22 +678,21 @@
 		sub.s 	$f6, $f6, $f6
 		sub.s 	$f4, $f4, $f4
 		
+		beq		$a1, $zero, MUL_WITH_EVEN_ARR		
+		la		$t2, oddWinLvl				
+		j		MUL_WITH_EVEN_ARR_SKIP				
+	
+		MUL_WITH_EVEN_ARR:
+			la		$t2, evenWinLvl			
+		MUL_WITH_EVEN_ARR_SKIP:
+				
+		
 		MEAN_ALGORITHM_LOOP1:
 				beq 		$t1, $zero, MEAN_ALGORITHM_LOOP1_OUT1
 				
-				add		$a1, $a0, $t3
-				lwc1 	$f4, ($a1)
+				add		$a0, $a0, $t3
+				lwc1 	$f4, ($a0)
 				
-				beq		$a1, $zero, MUL_WITH_EVEN_ARR
-				
-				la		$t2, oddWinLvl	
-				
-				j		MUL_WITH_EVEN_ARR_SKIP				
-				
-				MUL_WITH_EVEN_ARR:
-					la		$t2, evenWinLvl	
-				
-				MUL_WITH_EVEN_ARR_SKIP:
 				add		$t2, $t2, $t3
 				
 				lwc1		$f6, ($t2) 
@@ -687,7 +703,7 @@
 					
 
 				add 		$t1, $t1, -1				
-				add 		$t3, $t3, 4				
+				addi 	$t3, $zero, 4				
 				
 				j 		MEAN_ALGORITHM_LOOP1
 		MEAN_ALGORITHM_LOOP1_OUT1:
@@ -702,6 +718,7 @@
 				lw 		$t3, 8($sp) 
 				add 		$sp, $sp, 12
 				jr 		$ra
+
 
 #######################################################
 
