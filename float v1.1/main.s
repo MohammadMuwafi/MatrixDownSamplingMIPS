@@ -1,23 +1,4 @@
 .data
-	.globl	newLine
-	.globl	line
-	.globl	space
-	.globl	levels
-	.globl	evenWinLvl
-	.globl	oddWinLvl
-	.globl	answerOfMedianOrMean
-	.globl	forEvenLvl
-	.globl	choice
-	.globl 	rows
-	.globl 	cols
-	.globl 	file
-	.globl 	buffer
-	.globl 	bufferSize
-	.globl 	arr
-	.globl 	size
-	.globl 	sizeInByte
-	
-	
 	####################### for displaying. ########################
 	msg_lvl1: 	.asciiz "\n Please enter the values of levels: \n"
 	msg_lvl2: 	.asciiz "\n Level number: "
@@ -32,11 +13,11 @@
 	
 	# file name
 	file: 		.asciiz "input.txt"
-	buffer: 		.space 16384
-	bufferSize: 	.word 16384
+	buffer: 		.space 65536
+	bufferSize: 	.word 65536
 	output_file: 	.asciiz "outputx.txt"
-	million: 	.float 1000000.0	# used for getting all digits
-	string: 	.space 16384		# maximum space of string = 2096 bytes
+	million: 		.float 1000000.0	# used for getting all digits
+	string: 		.space 65536		# maximum space of string = 2096 bytes
 	
 	# mean or median
 	choice: 		.word 0
@@ -476,7 +457,7 @@
 			jal 		PRINT_STR	
 			
 			lb 		$t9, lvls
-			addi		$t9, $t9, 49
+			addi		$t9, $t9, 50
 			la		$s7, output_file
 			addi		$s7, $s7, 6
 			sb		$t9, ($s7)
@@ -914,9 +895,9 @@
 
 	WRTITE_TO_FILE:
 		sw		$s4, tempAddOfNewArr
-		
+
 		lb 		$t9, lvls
-		addi		$t9, $t9, 49
+		addi		$t9, $t9, 50
 		la		$s7, output_file
 		addi		$s7, $s7, 6
 		sb		$t9, ($s7)

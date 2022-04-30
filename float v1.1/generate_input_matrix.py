@@ -8,10 +8,10 @@ s = ""
 for _ in range(0, n):
     for __ in range(0, m):
         if __ in range(0, m - 1):
-            s += str(round(random.uniform(10.2, 66.6), 2))
+            s += str(round(random.uniform(10.2, 66.6), 1))
             s += ","
         else:
-            s += str(round(random.uniform(10.2, 66.6), 2))
+            s += str(round(random.uniform(10.2, 66.6), 1))
             s += "\n"
 
 

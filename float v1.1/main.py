@@ -11,8 +11,8 @@ levels = int(input("\nPlease enter number of levels\n"))
 ROW_WIN_SZ = 2
 COL_WIN_SZ = 2
 
-row_sz = 4  # change according to input file.
-col_sz = 4  # change according to input file.
+row_sz = 0  # change according to input file.
+col_sz = 0  # change according to input file.
 
 def get_median(array):
     sz = len(array)
